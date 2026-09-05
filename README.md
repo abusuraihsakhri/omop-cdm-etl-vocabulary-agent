@@ -1,7 +1,7 @@
-# OMOP Cdm Etl Vocabulary Agent
+# OMOP CDM ETL Vocabulary Agent
 
-> **Domain:** Clinical Decision Support & Biomedical Computing  
-> **Reference Guidelines & Standards:** `Standard Clinical Formulations & ISO/IEC Quality Frameworks`
+> **Domain:** Clinical Decision Support & Biomedical Computing
+> **Standards:** OHDSI OMOP Common Data Model v5.4, CAP, CLSI, ISO
 
 <div align="center">
 
@@ -18,82 +18,178 @@
 
 ## 📖 What It Does
 
-Omop Cdm Etl Vocabulary Agent
+The OMOP CDM ETL Vocabulary Agent is a multi-agent orchestration system for clinical data quality assessment and ETL pipeline monitoring. It provides:
+
+- **Multi-Agent Evaluation**: Three specialized workers (InvariantQC, SafetyEscalation, ProtocolConformance) evaluate clinical data payloads
+- **Consensus Dossier Generation**: Aggregates worker alerts into a unified assessment with HMAC-SHA256 audit trail
+- **PHI Outbound Guard**: Prevents protected health information from leaving the system via regex pattern detection
+- **Prometheus Metrics**: Exports operational metrics for monitoring and alerting
+- **FastAPI REST API**: HTTP endpoints for integration with clinical data pipelines
 
 ---
 
-## ⚙️ Key Capabilities & Algorithmic Modules
+## ⚙️ Architecture
 
-- **Deterministic Calculation Engine**: Strict compliance with standard reference formulations and thresholds.
-- **Risk & Urgency Classification**: Multi-tier categorization with automated clinical/operational action recommendations.
-- **Validation & Guardrails**: Rigorous input bounds checking and anomaly detection.
-
----
-
-## 💻 CLI Quickstart & Usage
-
-### 1. Guided Interactive Mode
-```bash
-python cli.py
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    SystemSupervisor                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │ InvariantQC  │  │   Safety     │  │  Protocol    │      │
+│  │   Worker     │  │ Escalation   │  │ Conformance  │      │
+│  │              │  │   Worker     │  │   Worker     │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│         │                 │                 │               │
+│         └─────────────────┼─────────────────┘               │
+│                    Consensus Dossier                        │
+│                           │                                 │
+│              HMAC-SHA256 Audit Trail                        │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### 2. Direct Parameterized Evaluation
+### Key Modules
+
+| Module | Purpose |
+|--------|---------|
+| `agents/supervisor.py` | Master orchestrator coordinating worker evaluations |
+| `agents/workers.py` | Specialized domain workers for QC, safety, and conformance |
+| `agents/base.py` | PHI guard, HMAC audit trail, security utilities |
+| `agents/models.py` | Pydantic schemas with input validation |
+| `agents/metrics.py` | Prometheus metrics exporter |
+| `agents/learning.py` | Bayesian calibration for worker reliability |
+| `agents/api.py` | FastAPI REST endpoints |
+| `omop_cdm_etl/` | Secondary ETL coordination module |
+
+---
+
+## 💻 Installation
+
 ```bash
-python cli.py --task-id <value> --target <value> --primary <value> --secondary <value>
+# Clone the repository
+git clone https://github.com/abusuraihsakhri/omop-cdm-etl-vocabulary-agent.git
+cd omop-cdm-etl-vocabulary-agent
+
+# Install dependencies
+pip install fastapi uvicorn pydantic pytest
+
+# Set required environment variable for audit security
+export AUDIT_SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
+```
+
+---
+
+## 💻 CLI Usage
+
+### 1. Single Task Evaluation
+```bash
+python cli.py audit --task-id TASK-001 --target KEY-01 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
+```
+
+### 2. Interactive Chat Query
+```bash
+python cli.py chat "What is the system status?"
+```
+
+### 3. Batch CSV Processing
+```bash
+python cli.py batch -i sample.csv -o results.csv
+```
+
+### 4. Verify Audit Trail Integrity
+```bash
+python cli.py verify-audit
+```
+
+### 5. Launch REST API Server
+```bash
+python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
 ### Parameter Reference
-- `--task-id`: Specifies input measurement or parameter value.
-- `--target`: Specifies input measurement or parameter value.
-- `--primary`: Specifies input measurement or parameter value.
-- `--secondary`: Specifies input measurement or parameter value.
-- `--critical`: Specifies input measurement or parameter value.
-- `--status`: Specifies input measurement or parameter value.
-- `--input`: Specifies input measurement or parameter value.
-- `--output`: Specifies input measurement or parameter value.
 
-### Input Data Schema
-
-| Field | Description | Requirement |
-|:------|:------------|:------------|
-| `task_id` | Parameter / observation metric | Required |
-| `target_identifier` | Parameter / observation metric | Required |
-| `primary_metric` | Parameter / observation metric | Required |
-| `secondary_metric` | Parameter / observation metric | Required |
-| `is_critical_flag` | Parameter / observation metric | Required |
-| `status_descriptor` | Parameter / observation metric | Required |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `--task-id` | string | TASK-2026-001 | Unique task identifier (alphanumeric, hyphens, underscores) |
+| `--target` | string | KEY-TARGET-01 | Target entity identifier |
+| `--primary` | float | 28.5 | Primary measurement value |
+| `--secondary` | float | 14.2 | Secondary measurement value |
+| `--critical` | flag | False | Mark as critical priority |
+| `--status` | string | DISCORDANT | Status descriptor |
 
 ---
 
-## 🛡️ Security & Enterprise Architecture
+## 🛡️ Security Features
 
-* **Zero-PHI Outbound Interceptor:** Active AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
-* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
-* **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights and monitoring Brier calibration drift.
-* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
+### Zero-PHI Outbound Interceptor
+Active regex inspection blocks SSNs, MRNs, phone numbers, emails, and patient identifiers from outbound data.
+
+```python
+from agents.base import PHIGuard
+
+# Raises SecurityException if PHI detected
+PHIGuard.assert_no_phi("Patient MRN-12345")  # Raises!
+
+# Or redact PHI automatically
+safe_text = PHIGuard.redact_phi("Contact: patient@email.com")
+# Returns: "Contact: [REDACTED_IDENTIFIER]"
+```
+
+### HMAC-SHA256 Tamper-Evident Audit Trail
+Every evaluation is logged with a chained cryptographic hash. The `AUDIT_SECRET_KEY` environment variable is **required** and must be at least 16 characters.
+
+### Input Validation
+All task IDs and identifiers are validated against injection attacks:
+- Only alphanumeric characters, hyphens, and underscores allowed
+- Maximum 64 characters
+- Path traversal and SQL injection patterns rejected
 
 ---
 
-## 🧪 Testing & Verification
-
-Run the automated test suite:
+## 🧪 Testing
 
 ```bash
+# Run all tests
 pytest -v
+
+# Run with coverage
+pytest -v --cov=agents --cov=omop_cdm_etl
+
+# Run specific test modules
+pytest tests/test_security_and_validation.py -v
+pytest tests/test_metrics_and_learning.py -v
 ```
 
-Execute high-throughput batch simulation benchmarks:
+### Test Coverage
+
+- **Security & Validation**: Audit key enforcement, input validation, PHI detection
+- **Core Functionality**: Worker evaluation, supervisor consensus, CLI commands
+- **Metrics & Learning**: Prometheus export, Bayesian calibration
+- **Enrichment Suite**: Feature engines, threshold escalation
+
+---
+
+## 🐳 Docker Deployment
 
 ```bash
-python simulator.py --tasks 1000 --concurrency 8
+# Build container
+docker build -t omop-cdm-etl-vocabulary-agent .
+
+# Run with audit key
+docker run -p 8000:8000 -e AUDIT_SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))") omop-cdm-etl-vocabulary-agent
 ```
 
 ---
 
-## 🐳 Container Deployment
+## 📊 Prometheus Metrics
 
-```bash
-docker build -t omop-cdm-etl-vocabulary-agent .
-docker run -p 8000:8000 omop-cdm-etl-vocabulary-agent
-```
+The `/metrics` endpoint exposes:
+- `system_tasks_total` - Total tasks processed
+- `alerts_triggered_total` - Alerts by urgency tier
+- `phi_outbound_blocks_total` - PHI guard blocks
+- `audit_chain_blocks_total` - Audit blocks signed
+- `task_processing_duration_avg_seconds` - Average latency
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
