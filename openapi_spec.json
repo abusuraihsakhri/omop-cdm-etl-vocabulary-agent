@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Omop Cdm Etl Vocabulary Engine API",
-    "description": "Enterprise Distributed Component Platform (Clinical & Cryptographic AI) adhering to CAP / CLSI / NIST Standards.",
+    "description": "Synthetic threshold-based quality checker, not OMOP vocabulary mapping or ETL.",
     "version": "3.0.0-ENTERPRISE",
     "contact": {
       "name": "Dr. Abu Suraih Sakhri",
@@ -22,10 +22,10 @@
     },
     "/metrics": {
       "get": {
-        "summary": "Prometheus operational metrics",
+        "summary": "JSON operational counters",
         "responses": {
           "200": {
-            "description": "Prometheus text metrics"
+            "description": "JSON counters"
           }
         }
       }
@@ -70,13 +70,16 @@
         "responses": {
           "200": {
             "description": "Consensus dossier with HMAC signature"
+          },
+          "422": {
+            "description": "Input validation or identifier safety guard rejected the request"
           }
         }
       }
     },
     "/api/chat": {
       "post": {
-        "summary": "Air-gapped supervisory conversational assistant",
+        "summary": "Deterministic mock chat response",
         "requestBody": {
           "content": {
             "application/json": {
@@ -107,6 +110,26 @@
         "responses": {
           "200": {
             "description": "Cryptographic audit trail"
+          }
+        }
+      }
+    },
+    "/metrics/prometheus": {
+      "get": {
+        "summary": "Prometheus text metrics",
+        "responses": {
+          "200": {
+            "description": "Text metric exposition"
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Local standalone demo when available",
+        "responses": {
+          "200": {
+            "description": "HTML demo or API docs location"
           }
         }
       }

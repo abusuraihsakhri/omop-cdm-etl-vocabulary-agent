@@ -77,8 +77,11 @@ def main(argv=None):
     if args.command == "verify-audit":
         trail = AuditLogger.get_trail()
         valid = AuditLogger.verify_integrity()
+        if not trail:
+            print("Audit Trail Blocks: 0 | No entries to verify in this process (in-memory only)")
+            return 0
         print(f"Audit Trail Blocks: {len(trail)} | Cryptographic Integrity Verified: {valid}")
-        return 0
+        return 0 if valid else 1
 
     if args.command == "batch":
         # Validate input file exists
