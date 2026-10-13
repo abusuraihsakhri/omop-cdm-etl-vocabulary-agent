@@ -26,7 +26,10 @@ class ChatRequest(BaseModel):
 
 @app.get("/", include_in_schema=False)
 def index():
-    return FileResponse(Path(__file__).resolve().parent.parent / "web" / "index.html")
+    demo_page = Path(__file__).resolve().parent.parent / "web" / "index.html"
+    if demo_page.is_file():
+        return FileResponse(demo_page)
+    return {"service": "omop-cdm-etl-vocabulary-agent", "api_docs": "/docs"}
 
 
 @app.get("/health")
