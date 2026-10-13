@@ -5,6 +5,8 @@ Standard: CAP / CLSI / ISO Standards
 """
 import datetime
 import re
+import math
+import json
 from enum import Enum
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field, field_validator
@@ -46,6 +48,24 @@ class SystemTaskPayload(BaseModel):
     is_critical_flag: bool = Field(default=False, description="Emergency escalation or high priority trigger")
     attributes: Dict[str, Any] = Field(default_factory=dict, description="Metadata key-value pairs")
     timestamp: str = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
+
+    @field_validator('primary_metric', 'secondary_metric')
+    @classmethod
+    def validate_finite_metric(cls, v):
+        if not math.isfinite(v):
+            raise ValueError("Metric must be a finite number")
+        return v
+
+    @field_validator('attributes')
+    @classmethod
+    def validate_attributes(cls, v):
+        try:
+            data = json.dumps(v, allow_nan=False)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Attributes must contain JSON-compatible values") from exc
+        if len(data.encode("utf-8")) > 16384:
+            raise ValueError("Attributes must be 16 KiB or smaller")
+        return v
 
     @field_validator('task_id')
     @classmethod
