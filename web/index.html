@@ -1,236 +1,123 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Omop Cdm Etl Vocabulary Engine — Operations Console</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #090d16;
-            --card: #111827;
-            --border: #1f293d;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.25);
-            --text: #f3f4f6;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 2rem;
-            min-height: 100vh;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .header-title h1 { font-size: 1.6rem; font-weight: 700; color: #fff; }
-        .header-title p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: var(--accent-glow);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 1.5rem;
-        }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .card h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-        input, select, textarea {
-            width: 100%;
-            padding: 0.65rem 0.9rem;
-            background: #0d1322;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-        input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-        .btn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 0.7rem 1.4rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-        }
-        .btn:hover { background: #2563eb; }
-        .terminal {
-            background: #060911;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: #10b981;
-            height: 380px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-        .metrics-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .metric-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-        }
-        .metric-val { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 0.25rem; }
-        .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>OMOP ETL — Local Quality-Check Demo</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark;color:#eef2fc;background:#0b1220}
+*{box-sizing:border-box}body{margin:0;padding:clamp(1rem,3vw,2.2rem);max-width:1200px;margin-inline:auto;line-height:1.5}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;padding-bottom:1.2rem;border-bottom:1px solid #324158;margin-bottom:1.3rem}
+h1{font-size:clamp(1.35rem,2.6vw,2rem);margin:0}h2{font-size:1.13rem;margin:0 0 1rem}p{margin:.35rem 0}.muted,.hint{color:#bdc9dc}.hint{font-size:.85rem}
+.pill{background:#142b38;border:1px solid #38667c;color:#bce8f3;border-radius:1rem;padding:.3rem .75rem;font-size:.78rem;font-weight:650}
+.notice{border-left:3px solid #e6b868;padding:.8rem 1rem;background:#292519;border-radius:5px;margin:1rem 0 1.5rem;font-size:.9rem}
+.grid{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,1.1fr);gap:1.2rem}
+.card{border:1px solid #324158;background:#131e30;padding:1.25rem;border-radius:12px;min-width:0}
+label{display:block;font-size:.87rem;font-weight:600;margin:.7rem 0 .25rem}
+input:not([type=checkbox]){display:block;width:100%;padding:.67rem .72rem;background:#0d1728;color:#f4f7ff;border:1px solid #64748b;border-radius:7px;font:inherit}
+input:focus-visible,button:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+.checkline{display:flex;align-items:center;gap:.55rem;font-size:.9rem;margin:1rem 0}
+.checkline label{margin:0}.checkline input{width:18px;height:18px}
+.actions{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1rem}
+button{font:inherit;font-weight:650;border-radius:7px;padding:.65rem .9rem;border:1px solid #7594b7;background:#263b57;color:#eef2ff;cursor:pointer}
+button.primary{background:#2563eb;border-color:#2563eb;color:white}button:hover{filter:brightness(1.12)}button:disabled{opacity:.55;cursor:not-allowed}
+pre{background:#0a1220;border:1px solid #2c3b50;padding:1rem;min-height:260px;max-height:480px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:7px;font-size:.83rem}
+.summary{display:flex;gap:1rem;flex-wrap:wrap;margin:.6rem 0 1rem}.summary span{background:#20324a;padding:.3rem .7rem;border-radius:.5rem}
+.error{color:#fecaca}.fine{font-size:.78rem;color:#bbcade;margin-top:1rem}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.card{padding:1rem}pre{min-height:180px}}
+</style>
 </head>
 <body>
+<header>
+  <div><h1>OMOP ETL — Local Quality-Check Demo</h1><p class="muted">Threshold-based payload checks · Standalone browser utility</p></div>
+  <span class="pill">Local processing · No API required</span>
+</header>
+<p class="notice"><strong>Scope:</strong> This tool evaluates example numerical thresholds and status flags. It does <strong>not</strong> map Athena vocabulary concepts, perform OMOP CDM ETL, certify clinical safety, or create a cryptographically signed audit trail. Do not enter protected health information. All values are processed locally in this tab.</p>
+<main class="grid">
+<section class="card" aria-labelledby="input-heading">
+<h2 id="input-heading">Evaluate a payload</h2>
+<form id="audit-form" novalidate>
+<label for="task-id">Task ID</label><input id="task-id" required maxlength="64" pattern="[A-Za-z0-9_-]{1,64}" value="TASK-001" autocomplete="off">
+<label for="target-id">Synthetic target key</label><input id="target-id" required maxlength="64" pattern="[A-Za-z0-9_-]{1,64}" value="SAMPLE-001" autocomplete="off">
+<label for="primary">Primary metric</label><input id="primary" type="number" required step="any" value="29.4">
+<label for="secondary">Secondary metric</label><input id="secondary" type="number" required step="any" value="14.8">
+<label for="descriptor">Status descriptor</label><input id="descriptor" required maxlength="128" value="DISCORDANT_ANOMALY" autocomplete="off">
+<div class="checkline"><input id="critical" type="checkbox"><label for="critical">Critical flag</label></div>
+<p class="hint">Demo rules: primary &gt;25 is elevated; secondary &gt;12 is elevated; critical flag is critical. Keywords DISCORDANT, ANOMALY, MUTANT, VIOLATION, FAIL or REJECT are elevated.</p>
+<div class="actions"><button class="primary" type="submit">Run local check</button><button id="export" type="button" disabled>Export JSON</button><button id="reset" type="reset">Reset</button></div>
+</form>
+</section>
+<section class="card" aria-labelledby="result-heading">
+<h2 id="result-heading">Local evaluation result</h2>
+<div class="summary" aria-live="polite"><span id="result-status">Not evaluated</span><span id="result-count">0 alerts</span></div>
+<pre id="result" tabindex="0" aria-live="polite">Enter synthetic values and select “Run local check”.</pre>
+<p id="error" class="error" role="alert" aria-live="assertive"></p>
+<p class="fine">Results stay in browser memory until this page is closed. Export is a local download. No HMAC or server-side verification is performed.</p>
+</section>
+</main>
+<script>
+"use strict";
+(() => {
+  const byId = id => document.getElementById(id);
+  const form = byId("audit-form");
+  let latest = null;
+  const validId = value => /^[A-Za-z0-9_-]{1,64}$/.test(value);
+  const suspectedIdentifier = value => /\b\d{3}-\d{2}-\d{4}\b|\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b|\b(?:MRN)[:#\s-]*\d{4,10}\b/i.test(value);
 
-    <div class="header">
-        <div class="header-title">
-            <h1>Omop Cdm Etl Vocabulary Engine</h1>
-            <p>Domain: Clinical & Cryptographic AI | Standard: CAP / CLSI / NIST Standards | LabMind-Atlas Architecture</p>
-        </div>
-        <div>
-            <span class="badge">Air-Gapped Active</span>
-            <span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">Zero-PHI Guard Active</span>
-        </div>
-    </div>
-
-    <div class="metrics-bar">
-        <div class="metric-box">
-            <div class="metric-label">System Status</div>
-            <div class="metric-val" style="color: var(--success);" id="m-status">OPTIMAL</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Tasks Processed</div>
-            <div class="metric-val" id="m-tasks">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Audit Blocks Signed</div>
-            <div class="metric-val" id="m-audit">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">PHI Interceptions</div>
-            <div class="metric-val" style="color: var(--accent);" id="m-phi">0</div>
-        </div>
-    </div>
-
-    <div class="grid">
-        <div class="card">
-            <h2>⚙️ Dispatch Distributed Component Audit</h2>
-            <div class="form-group">
-                <label>Task / Sample ID</label>
-                <input type="text" id="task_id" value="TASK-2026-LIVE-01">
-            </div>
-            <div class="form-group">
-                <label>Target Identifier</label>
-                <input type="text" id="target_id" value="SPECIMEN-ALPHA-77">
-            </div>
-            <div class="form-group">
-                <label>Primary Measurement / Value</label>
-                <input type="number" id="primary_metric" value="29.4" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Secondary Metric / Kinetic Index</label>
-                <input type="number" id="secondary_metric" value="14.8" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Status / Phenotype Descriptor</label>
-                <input type="text" id="status_descriptor" value="DISCORDANT_ANOMALY">
-            </div>
-            <div class="form-group">
-                <label><input type="checkbox" id="is_critical" checked> Trigger Emergency / Critical Flag</label>
-            </div>
-            <button class="btn" onclick="runAudit()">Execute Distributed Component Audit</button>
-        </div>
-
-        <div class="card">
-            <h2>📊 Real-Time Consensus Dossier & Audit Log</h2>
-            <div class="terminal" id="outputConsole">// Omop Cdm Etl Vocabulary Engine Operations Console Ready
-// Connection established with Air-Gapped Supervisor
-// Cryptographic HMAC-SHA256 audit ledger loaded.
-// Ready for live task payload dispatch...</div>
-        </div>
-    </div>
-
-    <script>
-        async function runAudit() {
-            const consoleEl = document.getElementById('outputConsole');
-            consoleEl.innerText = "// Dispatching task across specialized workers...
-// Invoking InvariantQCWorker, SafetyEscalationWorker, ProtocolWorker...";
-
-            const payload = {
-                task_id: document.getElementById('task_id').value,
-                target_identifier: document.getElementById('target_id').value,
-                primary_metric: parseFloat(document.getElementById('primary_metric').value),
-                secondary_metric: parseFloat(document.getElementById('secondary_metric').value),
-                status_descriptor: document.getElementById('status_descriptor').value,
-                is_critical_flag: document.getElementById('is_critical').checked
-            };
-
-            try {
-                const res = await fetch('/api/audit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                consoleEl.innerText = JSON.stringify(data, null, 2);
-                document.getElementById('m-tasks').innerText = parseInt(document.getElementById('m-tasks').innerText) + 1;
-                document.getElementById('m-audit').innerText = parseInt(document.getElementById('m-audit').innerText) + 1;
-            } catch (err) {
-                consoleEl.innerText = "// Offline / Simulation Output:\n" + JSON.stringify({
-                    dossier_id: "DOSSIER-SIM-" + Math.floor(Math.random()*10000),
-                    system: "omop-cdm-etl-vocabulary-engine",
-                    domain: "Clinical & Cryptographic AI",
-                    task_id: payload.task_id,
-                    overall_urgency: payload.is_critical_flag ? "CRITICAL_STAT_PANIC" : "ELEVATED_RISK",
-                    integrity_status: "DISCORDANT_ANOMALY",
-                    alerts: [
-                        { worker: "InvariantQCWorker", alert: "Primary metric exceeds upper reference bound" },
-                        { worker: "SafetyEscalationWorker", alert: "Critical emergency interlock flag active" }
-                    ],
-                    audit_hash: "HMAC_SHA256_e83f9a72b941d6c381f9"
-                }, null, 2);
-            }
-        }
-    </script>
+  function check() {
+    if (!form.checkValidity()) throw new Error("Complete all fields with valid, finite values.");
+    const task_id = byId("task-id").value.trim();
+    const target_identifier = byId("target-id").value.trim();
+    const status_descriptor = byId("descriptor").value.trim().toUpperCase();
+    if (!validId(task_id) || !validId(target_identifier) || !status_descriptor || status_descriptor.length > 128)
+      throw new Error("Check task ID, target key and status descriptor.");
+    if (suspectedIdentifier(status_descriptor)) throw new Error("Potential personal identifier detected. Use synthetic values only.");
+    const primary_metric = Number(byId("primary").value);
+    const secondary_metric = Number(byId("secondary").value);
+    if (![primary_metric, secondary_metric].every(Number.isFinite)) throw new Error("Metrics must be finite numbers.");
+    const is_critical_flag = byId("critical").checked;
+    const alerts = [];
+    if (primary_metric > 25) alerts.push({worker:"InvariantQCWorker", urgency:"ELEVATED_RISK", summary:"Primary metric exceeds demo threshold 25"});
+    if (is_critical_flag || secondary_metric > 12) alerts.push({worker:"SafetyEscalationWorker", urgency:is_critical_flag?"CRITICAL_STAT_PANIC":"ELEVATED_RISK",summary:"Critical flag set or secondary metric exceeds demo threshold 12"});
+    if (["DISCORDANT","ANOMALY","MUTANT","VIOLATION","FAIL","REJECT"].some(v => status_descriptor.includes(v)))
+      alerts.push({worker:"ProtocolConformanceWorker",urgency:"ELEVATED_RISK",summary:"Status descriptor contains a demo anomaly keyword"});
+    const overall_urgency = alerts.some(a=>a.urgency==="CRITICAL_STAT_PANIC")?"CRITICAL_STAT_PANIC":alerts.length?"ELEVATED_RISK":"ROUTINE";
+    return {mode:"LOCAL_UNSIGNED_DEMO",task_id,target_identifier,primary_metric,secondary_metric,status_descriptor,is_critical_flag,overall_urgency,total_alerts:alerts.length,alerts};
+  }
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    byId("error").textContent = "";
+    try {
+      latest = check();
+      byId("result").textContent = JSON.stringify(latest,null,2);
+      byId("result-status").textContent = latest.overall_urgency;
+      byId("result-count").textContent = latest.total_alerts + " alerts";
+      byId("export").disabled = false;
+    } catch (err) {
+      latest = null;
+      byId("result").textContent = "No result generated.";
+      byId("result-status").textContent = "Validation error";
+      byId("result-count").textContent = "0 alerts";
+      byId("error").textContent = err.message;
+      byId("export").disabled = true;
+    }
+  });
+  form.addEventListener("reset", () => {
+    latest = null;byId("result").textContent = "Enter synthetic values and select “Run local check”.";
+    byId("result-status").textContent = "Not evaluated";byId("result-count").textContent = "0 alerts";
+    byId("error").textContent = "";byId("export").disabled = true;
+  });
+  byId("export").addEventListener("click", () => {
+    if (!latest) return;
+    const blob = new Blob([JSON.stringify(latest,null,2)+"\n"],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;link.download = "omop-local-check.json";
+    document.body.append(link);link.click();link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+})();
+</script>
 </body>
 </html>
